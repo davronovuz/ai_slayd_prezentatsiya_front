@@ -26,28 +26,45 @@ function App() {
     }
   }, []);
 
-  const handleSubmit = () => {
-    if (!canSubmit) return;
-    setIsSubmitting(true);
+ const handleSubmit = () => {
+  if (!canSubmit) return;
+  setIsSubmitting(true);
 
-    const data = {
-      type: 'presentation',
-      topic: topic.trim(),
-      details: details.trim(),
-      slide_count: slideCount,
-      theme_id: selectedTheme.id,
-      language: selectedLang.id,
-      total_price: totalPrice
-    };
-
-    if (tg?.sendData) {
-      tg.sendData(JSON.stringify(data));
-    } else {
-      console.log('📤 Data:', data);
-      alert(JSON.stringify(data, null, 2));
-      setTimeout(() => setIsSubmitting(false), 1000);
-    }
+  const data = {
+    type: 'presentation',
+    topic: topic.trim(),
+    details: details.trim(),
+    slide_count: slideCount,
+    theme_id: selectedTheme.id,
+    language: selectedLang.id,
+    total_price: totalPrice
   };
+
+  try {
+    if (tg) {
+      // Telegram Web App
+      tg.sendData(JSON.stringify(data));
+      
+      // Yopish
+      setTimeout(() => {
+        try {
+          tg.close();
+        } catch (e) {
+          console.log('Close error:', e);
+        }
+      }, 300);
+    } else {
+      // Test mode (brauzerda)
+      console.log('📤 Data:', data);
+      alert('Test: ' + JSON.stringify(data, null, 2));
+      setIsSubmitting(false);
+    }
+  } catch (error) {
+    console.error('Send error:', error);
+    setIsSubmitting(false);
+    alert('Xatolik yuz berdi!');
+  }
+};
 
   const formatMoney = (n) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 
